@@ -84,10 +84,10 @@ This is not an officially supported product. It is primarily intended for resear
 ## Citation
 If you find this repository useful for your work, please consider citing us as follows:
 ```
-@article{nair2025flow,
+@inproceedings{nair2025flow,
   title={Flow-of-Options: Diversified and Improved LLM Reasoning by Thinking Through Options},
   author={Nair, Lakshmi and Trase, Ian and Kim, Mark},
-  journal={arXiv preprint arXiv:2502.12929},
+  booktitle={Forty-second International Conference on Machine Learning},
   year={2025}
 }
 ```
