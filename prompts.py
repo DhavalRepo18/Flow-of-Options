@@ -81,7 +81,7 @@ def generate_planner_prompt(task: str, data_quality_report: str = None) -> str:
     return prompt + structure
 
 
-def generate_rank_steps_prompt(task: str, plan: str):
+def generate_rank_steps_prompt(task: str, plan: str, data_quality_report: str = None):
     prompt = f"""
     You are an expert ML scientist provided with a task and a high-level plan for solving the task.
     task: {task}
@@ -95,6 +95,28 @@ def generate_rank_steps_prompt(task: str, plan: str):
     If the response is incorrect, modify the response to the correct one.
     """
 
+    prompt_with_dqr = """
+    You are an expert ML scientist provided with:
+    1. A task
+    2. A high-level plan for solving the task
+    3. A data quality report for the dataset used in this task
+
+    task: {task}
+    high-level plan: {plan}
+    data quality report: {data_quality_report}
+
+    Your goal is to rank the steps in the high-level plan based on their relevance to improving model accuracy on the task.
+    When assessing each step:
+    - Consider both general ML accuracy impact and any issues, risks, or limitations highlighted in the data quality report.
+    - If a step addresses a major data issue mentioned in the report, it may have higher impact on accuracy.
+
+    Process:
+    1. Assess each step in the plan and determine whether it can impact accuracy.
+    2. For impactful steps, rank from most impactful (rank = 1) to least impactful.
+    3. For non-impactful steps, assign rank = -1.
+    4. Act as an impartial judge: re-check your ranking against the provided task, plan, and data quality report, and revise if necessary.
+    """
+
     structure = """
     Generate your output in the following JSON-friendly format:
     {
@@ -103,6 +125,9 @@ def generate_rank_steps_prompt(task: str, plan: str):
     ...
     }
     """
+    if data_quality_report and data_quality_report.strip():
+        return prompt_with_dqr + structure
+
     return prompt + structure
 
 
