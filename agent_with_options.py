@@ -530,7 +530,8 @@ def run_pipeline(
 	base_sanity_checks(beam_widths, num_walks_per_iter, num_iters)
 
 	# Generate a brief description of the task that we can use for retrieval and for saving cases in CBR.
-	task_brief = call_model_openai(f"Please generate a summary of the task description: {task}")[0]
+	task_brief = call_model_litellm(f"Please generate a summary of the task description: {task}")[0]
+
 
 	# Track best result and best code
 	best_result = None
