@@ -43,7 +43,7 @@ Use Cases:
 """
 
 
-def generate_planner_prompt(task: str) -> str:
+def generate_planner_prompt(task: str, data_quality_report: str = None) -> str:
     prompt = f"""
     You are an expert ML scientist provided with the following task:
     task: {task}
@@ -51,6 +51,20 @@ def generate_planner_prompt(task: str) -> str:
     Think through the task step-by-step and produce a highly detailed list of steps involved in solving this task.
     Do not include steps for visualization, logging, hyperparameter tuning, and documentation.
     Do not include any code in your response.\n
+    """
+
+    prompt_with_dqr = """
+    You are an expert ML scientist provided with the following task:
+    task: {task}
+
+    You are also given a data quality report for the dataset associated with this task:
+    {data_quality_report}
+
+    Think through the task step-by-step, considering both the task requirements and the insights from the data quality report.
+    Ensure that your plan reflects any necessary preprocessing, feature engineering, or data handling steps that address the identified data quality issues.
+
+    Do not include steps for visualization, logging, hyperparameter tuning, or documentation.
+    Do not include any code in your response.
     """
 
     structure = """
@@ -61,6 +75,9 @@ def generate_planner_prompt(task: str) -> str:
     ...
     }
     """
+    if data_quality_report and data_quality_report.strip():
+        return prompt_with_dqr + structure
+
     return prompt + structure
 
 
@@ -89,7 +106,9 @@ def generate_rank_steps_prompt(task: str, plan: str):
     return prompt + structure
 
 
-def generate_nodes_prompt(task: str, step: str, num_options: int, prev_steps: list[str]) -> str:
+def generate_nodes_prompt(
+    task: str, step: str, num_options: int, prev_steps: list[str]
+) -> str:
     s = "".join(prev_steps)
 
     if prev_steps:
@@ -149,7 +168,13 @@ def generate_nodes_prompt(task: str, step: str, num_options: int, prev_steps: li
     return prompt + structure
 
 
-def generate_nodes_given_case_prompt(task: str, step: str, num_options: int, prev_steps: list[str], case_options: list[str]) -> str:
+def generate_nodes_given_case_prompt(
+    task: str,
+    step: str,
+    num_options: int,
+    prev_steps: list[str],
+    case_options: list[str],
+) -> str:
     s = "".join(prev_steps)
     c = [f"{i + 1}. {case_options[i]}\n" for i in range(len(case_options))]
     c = "".join(c)
@@ -358,8 +383,12 @@ def generate_check_consistency_prompt(plan: str, step: str) -> str:
     return prompt + structure
 
 
-def generate_adapter_prompt(task: str, plan: list[str]=None, options: list[str]=None) -> str:
-    assert plan is not None or options is not None, "Please specify either plan or option."
+def generate_adapter_prompt(
+    task: str, plan: list[str] = None, options: list[str] = None
+) -> str:
+    assert (
+        plan is not None or options is not None
+    ), "Please specify either plan or option."
     if plan is not None:
         plan = [f"{i + 1}. {plan[i]}\n" for i in range(len(plan))]
         prompt = f"""
@@ -416,5 +445,5 @@ def generate_adapter_prompt(task: str, plan: list[str]=None, options: list[str]=
         ...
         }
         """
-        
+
         return prompt + structure
